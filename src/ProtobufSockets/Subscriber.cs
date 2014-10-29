@@ -71,7 +71,8 @@ namespace ProtobufSockets
 
         private void Connect()
         {
-            if (!Monitor.TryEnter(_connectSync)) return;
+//            if (!Monitor.TryEnter(_connectSync)) return;
+			Monitor.Enter(_connectSync);
             try
             {
                 _indexEndPoint++;
@@ -152,7 +153,8 @@ namespace ProtobufSockets
 
         private void Reconnect()
         {
-            if (!Monitor.TryEnter(_connectSync)) return;
+			//if (!Monitor.TryEnter(_connectSync)) return;
+			Monitor.Enter(_connectSync);
             try
             {
                 try
