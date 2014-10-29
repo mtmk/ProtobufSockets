@@ -29,13 +29,13 @@ This library uses syncronous sockets (i.e. Not IOCP) and keeps hold of a thread
 per client connection. It is not recommended if you have many clients
 (e.g. more than 50) especially connecting and disconnecting frequently.
 
-Main scenario this library servers
-==================================
-A few backhand services that needs to process lgiht to medium load (tens to a few
-hundred messages per second) messages in a ressilient fashion (i.e. subscriber
-can connect to an equal publisher if one fails). Also no overall message consistancy
+Main scenario
+=============
+A few backend services that needs to process light to medium load (tens to a few
+hundred messages per second) in a ressilient fashion (i.e. subscriber
+can connect to an equal publisher if one fails). Also no overall message consistency
 is guaranteed either, so durign failover yoou might loose a few messages.
-You applicatiion should be tolorant for this occasional message loss as well.
+Your application should be tolerant for this occasional message loss as well.
 
 Other libraries you might want to check
 =======================================
