@@ -8,7 +8,7 @@ namespace ProtobufSockets.Tests
 	[TestFixture]
     public class PubSubTests
     {
-		const int _timeout = 30000;
+		const int _timeout = 3000;
 		[Test]
         public void Publisher_starts_with_an_ephemeral_port()
         {
