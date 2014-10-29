@@ -8,6 +8,7 @@ namespace ProtobufSockets.Tests
 	[TestFixture]
     public class PubSubTests
     {
+		const int _timeout = 30000;
 		[Test]
         public void Publisher_starts_with_an_ephemeral_port()
         {
@@ -25,7 +26,7 @@ namespace ProtobufSockets.Tests
 
             publisher.Publish("*", new Message {Payload = "payload1"});
 
-            Assert.IsTrue(r.WaitOne(3000), "Timed out");
+			Assert.IsTrue(r.WaitOne(_timeout), "Timed out");
 
             publisher.Dispose();
             subscriber.Dispose();
@@ -56,8 +57,8 @@ namespace ProtobufSockets.Tests
             publisher.Publish("topic1", new Message { Payload = "payload1" });
             publisher.Publish("topic2", new Message { Payload = "payload2" });
 
-            Assert.IsTrue(r1.WaitOne(3000), "Timed out");
-            Assert.IsTrue(r2.WaitOne(3000), "Timed out");
+			Assert.IsTrue(r1.WaitOne(_timeout), "Timed out");
+			Assert.IsTrue(r2.WaitOne(_timeout), "Timed out");
 
             publisher.Dispose();
             subscriber1.Dispose();
@@ -108,27 +109,27 @@ namespace ProtobufSockets.Tests
                 r2[c-1].Set();
             }, ep => rc2[ep].Set());
 
-            Assert.True(rc1[publisher1.EndPoint].WaitOne(3000), "Timed out");
-            Assert.True(rc2[publisher1.EndPoint].WaitOne(3000), "Timed out");
+			Assert.True(rc1[publisher1.EndPoint].WaitOne(_timeout), "Timed out");
+			Assert.True(rc2[publisher1.EndPoint].WaitOne(_timeout), "Timed out");
             publisher1.Publish(new Message { Payload = "payload1" });
-            Assert.True(r1[0].WaitOne(3000), "Timed out");
-            Assert.True(r2[0].WaitOne(3000), "Timed out");
+			Assert.True(r1[0].WaitOne(_timeout), "Timed out");
+			Assert.True(r2[0].WaitOne(_timeout), "Timed out");
             publisher1.Dispose();
 
             // should fail over to publisher2
-            Assert.True(rc1[publisher2.EndPoint].WaitOne(3000), "Timed out");
-            Assert.True(rc2[publisher2.EndPoint].WaitOne(3000), "Timed out");
+			Assert.True(rc1[publisher2.EndPoint].WaitOne(_timeout), "Timed out");
+			Assert.True(rc2[publisher2.EndPoint].WaitOne(_timeout), "Timed out");
             publisher2.Publish(new Message { Payload = "payload2" });
-            Assert.True(r1[1].WaitOne(3000), "Timed out");
-            Assert.True(r2[1].WaitOne(3000), "Timed out");
+			Assert.True(r1[1].WaitOne(_timeout), "Timed out");
+			Assert.True(r2[1].WaitOne(_timeout), "Timed out");
             publisher2.Dispose();
 
             // should fail over to publisher3
-            Assert.True(rc1[publisher3.EndPoint].WaitOne(3000), "Timed out");
-            Assert.True(rc2[publisher3.EndPoint].WaitOne(3000), "Timed out");
+			Assert.True(rc1[publisher3.EndPoint].WaitOne(_timeout), "Timed out");
+			Assert.True(rc2[publisher3.EndPoint].WaitOne(_timeout), "Timed out");
             publisher3.Publish(new Message { Payload = "payload3" });
-            Assert.True(r1[2].WaitOne(3000), "Timed out");
-            Assert.True(r2[2].WaitOne(3000), "Timed out");
+			Assert.True(r1[2].WaitOne(_timeout), "Timed out");
+			Assert.True(r2[2].WaitOne(_timeout), "Timed out");
             publisher3.Dispose();
 
             subscriber1.Dispose();
