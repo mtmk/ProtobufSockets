@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtobufSockets", "ProtobufSockets\ProtobufSockets.csproj", "{3C11CC05-CA2A-4205-A08A-69AB1C97FC29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtobufSockets.Tests", "ProtobufSockets.Tests\ProtobufSockets.Tests.csproj", "{DAA4AA5A-D082-41AA-92BD-5826725AF517}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pbspub", "pbspub\pbspub.csproj", "{75CEE584-9B5A-47FA-B69D-EB564B884CA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pbssub", "pbssub\pbssub.csproj", "{D3A47ABE-EAA1-41C3-B52D-ADA7CABE0C12}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{13574280-C6ED-4B9F-B1B5-D3CD90429A1E}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3C11CC05-CA2A-4205-A08A-69AB1C97FC29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C11CC05-CA2A-4205-A08A-69AB1C97FC29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C11CC05-CA2A-4205-A08A-69AB1C97FC29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C11CC05-CA2A-4205-A08A-69AB1C97FC29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75CEE584-9B5A-47FA-B69D-EB564B884CA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75CEE584-9B5A-47FA-B69D-EB564B884CA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75CEE584-9B5A-47FA-B69D-EB564B884CA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75CEE584-9B5A-47FA-B69D-EB564B884CA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3A47ABE-EAA1-41C3-B52D-ADA7CABE0C12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3A47ABE-EAA1-41C3-B52D-ADA7CABE0C12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3A47ABE-EAA1-41C3-B52D-ADA7CABE0C12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3A47ABE-EAA1-41C3-B52D-ADA7CABE0C12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ProtobufSockets.Tests\ProtobufSockets.Tests.csproj
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
