@@ -90,6 +90,12 @@ namespace ProtobufSockets
                 _serialiser.Serialise(_networkStream, new Header { Topic = _topic, Type = _type.Name, Name = _name });
                 var ack = _serialiser.Deserialize<string>(_networkStream);
 
+				if (ack != "OK")
+				{
+					Reconnect();
+					return;
+				}
+
                 CleanExitConsumerThread();
 
                 _consumerThread = new Thread(Consume) { IsBackground = true };
@@ -118,7 +124,7 @@ namespace ProtobufSockets
             }
             catch (Exception e)
             {
-                Log.Error(Tag, "UNEXPECTED_ERROR_SUB1: {0} : {1}", e.GetType(), e.Message);
+                Log.Fatal(Tag, "UNEXPECTED_ERROR_SUB1: {0} : {1}", e.GetType(), e.Message);
                 Reconnect();
             }
             finally

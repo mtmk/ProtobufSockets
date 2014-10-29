@@ -116,14 +116,14 @@ namespace ProtobufSockets
                 var client = new PublisherClient(tcpClient, networkStream, _store);
 
                 socket = tcpClient.Client;
-                _store.Add(socket, client);
 
                 var header = Serializer.DeserializeWithLengthPrefix<Header>(networkStream, PrefixStyle.Base128);
                 Log.Info(Tag, "client topic is.. " + header.Topic);
 
-                Serializer.SerializeWithLengthPrefix(networkStream, "OK", PrefixStyle.Base128);
+				_store.Add(socket, client);
+				client.SetServerAck(header);
 
-                client.SetServerAck(header);
+                Serializer.SerializeWithLengthPrefix(networkStream, "OK", PrefixStyle.Base128);
             }
             catch (Exception e)
             {

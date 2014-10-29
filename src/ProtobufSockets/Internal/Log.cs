@@ -7,10 +7,17 @@ namespace ProtobufSockets.Internal
     {
         static readonly TraceSource TraceSource = new TraceSource("ProtobufSockets");
 
-        internal static void Error(LogTag tag, string format, params object[] args)
-        {
-            Write(TraceEventType.Error, tag, format, args);
-        }
+		internal static void Fatal(LogTag tag, string format, params object[] args)
+		{
+			Write(TraceEventType.Critical, tag, format, args);
+			Trace.WriteLine("ProtobufSockets: Fatal error: " + tag + " - " + string.Format(format, args));
+			Console.Error.WriteLine("ProtobufSockets: Fatal error: " + tag + " - " + string.Format(format, args));
+		}
+
+		internal static void Error(LogTag tag, string format, params object[] args)
+		{
+			Write(TraceEventType.Error, tag, format, args);
+		}
 
         [Conditional("TRACE")]
         internal static void Info(LogTag tag, string format, params object[] args)
