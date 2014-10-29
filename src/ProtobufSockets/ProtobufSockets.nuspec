@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package >
   <metadata>
-    <id>$id$</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
-    <licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl>
-    <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
-    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+    <id>ProtobufSockets</id>
+    <version>0.1</version>
+    <title>Protocol Buffers Sockets for .Net (PubSub)</title>
+    <authors>Ziya Suzen</authors>
+    <owners>Ziya Suzen</owners>
+    <licenseUrl>https://github.com/mtmk/ProtobufSockets/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/mtmk/ProtobufSockets</projechtUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
-    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
-    <copyright>Copyright 2014</copyright>
-    <tags>Tag1 Tag2</tags>
+    <description>Simple .Net socket wrapper aimed at PubSub using protobuf-net. It supports simple round-robin failover and transparent connection recovery if the publisher goes down temporarily.</description>
+    <releaseNotes>Initial release</releaseNotes>
+    <copyright>Copyright 2014 Ziya Suzen</copyright>
+    <tags>protobuf pubsub</tags>
+<dependencies>
+  <dependency id="protobuf-net" version="2.0.0.668" targetFramework="net40" />
+    </dependencies>
   </metadata>
 </package>
