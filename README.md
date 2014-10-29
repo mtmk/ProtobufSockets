@@ -3,6 +3,8 @@ ProtobufSockets
 
 Simple .Net socket wrapper aimed at PubSub using protobuf-net. It supports simple round-robin failover and transparent connection recovery if the publisher goes down temporarily.
 
+<img src="https://ci.appveyor.com/api/projects/status/github/mtmk/ProtobufSockets?branch=master&svg=true"/>
+
 Example
 =======
 
