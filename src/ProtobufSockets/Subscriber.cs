@@ -1,15 +1,23 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using ProtobufSockets.Internal;
+using ProtobufSockets.Stats;
 
 namespace ProtobufSockets
 {
     public class Subscriber : IDisposable
     {
         private const LogTag Tag = LogTag.Subscriber;
+
+        private int _connected;
+        private int _reconnect;
+        private int _messageCount;
+        private string _currentEndPoint;
+        private readonly string[] _endPoints;
 
         private int _indexEndPoint = -1;
         private readonly IPEndPoint[] _endPoint;
@@ -25,13 +33,18 @@ namespace ProtobufSockets
         private readonly ProtoSerialiser _serialiser = new ProtoSerialiser();
         private readonly object _disposeSync = new object();
         private readonly object _connectSync = new object();
+        private readonly object _reconnectSync = new object();
+        private readonly object _tcpClientSync = new object();
         private readonly object _typeSync = new object();
-        private Action<IPEndPoint> _connected;
+        private readonly object _statSync = new object();
+        private Action<IPEndPoint> _connectedAction;
 
         public Subscriber(IPEndPoint[] endPoint, string name = null)
         {
             _endPoint = endPoint;
             _name = name;
+
+            _endPoints = _endPoint.Select(e => e.ToString()).ToArray();
         }
 
         public void Subscribe<T>(Action<T> action)
@@ -43,7 +56,7 @@ namespace ProtobufSockets
         {
             _action = m => action((T)m);
             
-            _connected = connected;
+            _connectedAction = connected;
 
             _topic = topic;
             
@@ -63,7 +76,11 @@ namespace ProtobufSockets
             lock (_disposeSync)
                 _disposed = true;
 
-            _tcpClient.Close();
+            lock(_tcpClientSync)
+            {
+                if (_tcpClient != null)
+                _tcpClient.Close();
+            }
 
             lock (_connectSync)
                 CleanExitConsumerThread();
@@ -71,7 +88,6 @@ namespace ProtobufSockets
 
         private void Connect()
         {
-//            if (!Monitor.TryEnter(_connectSync)) return;
 			Monitor.Enter(_connectSync);
             try
             {
@@ -79,10 +95,16 @@ namespace ProtobufSockets
                 if (_indexEndPoint == _endPoint.Length)
                     _indexEndPoint = 0;
 
-                if (_tcpClient != null)
-                    _tcpClient.Close();
+                lock (_tcpClientSync)
+                {
+                    if (_tcpClient != null)
+                        _tcpClient.Close();
 
-                _tcpClient = new TcpClient { NoDelay = true, LingerState = { Enabled = true, LingerTime = 0 } };
+                    _tcpClient = new TcpClient {NoDelay = true, LingerState = {Enabled = true, LingerTime = 0}};
+                }
+
+                lock (_statSync)
+                    _currentEndPoint = _endPoint[_indexEndPoint].ToString();
 
                 _tcpClient.Connect(_endPoint[_indexEndPoint]);
 
@@ -102,8 +124,8 @@ namespace ProtobufSockets
                 _consumerThread = new Thread(Consume) { IsBackground = true };
                 _consumerThread.Start();
 
-                if (_connected != null)
-                    _connected(_endPoint[_indexEndPoint]);
+                if (_connectedAction != null)
+                    _connectedAction(_endPoint[_indexEndPoint]);
 
                 Log.Debug(Tag, "publisher ack.. " + ack);
                 Log.Debug(Tag, "subscribing started..");
@@ -147,14 +169,15 @@ namespace ProtobufSockets
             }
             catch (Exception e)
             {
-                Log.Error(Tag, "UNEXPECTED_ERROR_SUB2: {0} : {1}", e.GetType(), e.Message);
+                Log.Fatal(Tag, "UNEXPECTED_ERROR_SUB2: {0} : {1}", e.GetType(), e.Message);
             }
         }
 
         private void Reconnect()
         {
-			//if (!Monitor.TryEnter(_connectSync)) return;
-			Monitor.Enter(_connectSync);
+            Interlocked.Increment(ref _reconnect);
+            
+            if (!Monitor.TryEnter(_reconnectSync)) return;
             try
             {
                 try
@@ -164,13 +187,27 @@ namespace ProtobufSockets
                 }
                 catch (Exception e)
                 {
-                    Log.Error(Tag, "UNEXPECTED_ERROR_SUB3: {0} : {1}", e.GetType(), e.Message);
+                    Log.Fatal(Tag, "UNEXPECTED_ERROR_SUB3: {0} : {1}", e.GetType(), e.Message);
                 }
+                
+                try
+                {
+                    lock (_tcpClientSync)
+                    {
+                        _tcpClient.Close();
+                        _tcpClient = null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Fatal(Tag, "UNEXPECTED_ERROR_SUB4: {0} : {1}", e.GetType(), e.Message);
+                }
+
                 _reconnectTimer = new Timer(_ => Connect(), null, 1000, Timeout.Infinite);
             }
             finally
             {
-                Monitor.Exit(_connectSync);
+                Monitor.Exit(_reconnectSync);
             }
         }
 
@@ -183,6 +220,8 @@ namespace ProtobufSockets
             var typeName = type.Name;
 
             Log.Info(Tag, "consume started..");
+
+            Interlocked.Exchange(ref _connected, 1);
 
             while (true)
             {
@@ -199,7 +238,9 @@ namespace ProtobufSockets
 
                     var message = _serialiser.Deserialize(_networkStream, type);
 
-                    Log.Info(Tag, "got message..");
+                    Log.Debug(Tag, "got message..");
+
+                    Interlocked.Increment(ref _messageCount);
 
                     _action(message);
                 }
@@ -219,14 +260,43 @@ namespace ProtobufSockets
                 }
                 catch (Exception e)
                 {
-                    Log.Info(Tag, "UNEXPECTED_ERROR_SUB4: {0} : {1}", e.GetType(), e.Message);
+                    Log.Fatal(Tag, "UNEXPECTED_ERROR_SUB4: {0} : {1}", e.GetType(), e.Message);
                     lock (_disposeSync) if (_disposed) break;
                     Reconnect();
                     break;
                 }
             }
 
+            Interlocked.Exchange(ref _connected, 0);
+
             Log.Info(Tag, "consume exit..");
+        }
+
+        public SubscriberStats GetStats()
+        {
+            string currentEndPoint;
+            string[] endPoints;
+            string topic;
+            string type;
+            string name;
+
+            lock (_statSync)
+            {
+                currentEndPoint = _currentEndPoint;
+                endPoints = _endPoints;
+                topic = _topic;
+                type = _type.Name;
+                name = _name;
+            }
+
+            return new SubscriberStats(Interlocked.CompareExchange(ref _connected, 0, 0) == 1,
+                Interlocked.CompareExchange(ref _reconnect, 0, 0),
+                Interlocked.CompareExchange(ref _messageCount, 0, 0),
+                currentEndPoint,
+                endPoints,
+                topic,
+                type,
+                name);
         }
     }
 }

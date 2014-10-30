@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-VisualStudioVersion = 12.0.30501.0
-MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtobufSockets", "ProtobufSockets\ProtobufSockets.csproj", "{3C11CC05-CA2A-4205-A08A-69AB1C97FC29}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtobufSockets.Tests", "ProtobufSockets.Tests\ProtobufSockets.Tests.csproj", "{DAA4AA5A-D082-41AA-92BD-5826725AF517}"
@@ -16,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{135742
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtobufSockets.TestGui", "ProtobufSockets.TestGui\ProtobufSockets.TestGui.csproj", "{495E0403-9266-4EB9-AEC0-130F9AFE1D39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +26,10 @@ Global
 		{3C11CC05-CA2A-4205-A08A-69AB1C97FC29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C11CC05-CA2A-4205-A08A-69AB1C97FC29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C11CC05-CA2A-4205-A08A-69AB1C97FC29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Release|Any CPU.Build.0 = Release|Any CPU
 		{75CEE584-9B5A-47FA-B69D-EB564B884CA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{75CEE584-9B5A-47FA-B69D-EB564B884CA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75CEE584-9B5A-47FA-B69D-EB564B884CA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -34,17 +38,15 @@ Global
 		{D3A47ABE-EAA1-41C3-B52D-ADA7CABE0C12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3A47ABE-EAA1-41C3-B52D-ADA7CABE0C12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3A47ABE-EAA1-41C3-B52D-ADA7CABE0C12}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DAA4AA5A-D082-41AA-92BD-5826725AF517}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = ProtobufSockets.Tests\ProtobufSockets.Tests.csproj
+		{495E0403-9266-4EB9-AEC0-130F9AFE1D39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{495E0403-9266-4EB9-AEC0-130F9AFE1D39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{495E0403-9266-4EB9-AEC0-130F9AFE1D39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{495E0403-9266-4EB9-AEC0-130F9AFE1D39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ProtobufSockets.Tests\ProtobufSockets.Tests.csproj
 	EndGlobalSection
 EndGlobal
