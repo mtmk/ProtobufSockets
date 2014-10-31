@@ -10,27 +10,65 @@ namespace ProtobufSockets.Tests
     {
 		const int _timeout = 3000;
 		[Test]
-        public void Publisher_starts_with_an_ephemeral_port()
-        {
-            var r = new ManualResetEvent(false);
+		public void Publisher_starts_with_an_ephemeral_port()
+		{
+			var r = new ManualResetEvent(false);
 
-            var publisher = new Publisher();
-            
-            var subscriber = new Subscriber(new []{publisher.EndPoint});
+			var publisher = new Publisher();
 
-            subscriber.Subscribe<Message>("*", m =>
-            {
-                r.Set();
-                Assert.AreEqual("payload1", m.Payload);
-            });
+			var subscriber = new Subscriber(new []{publisher.EndPoint});
 
-            publisher.Publish("*", new Message {Payload = "payload1"});
+			subscriber.Subscribe<Message>("*", m =>
+				{
+					r.Set();
+					Assert.AreEqual("payload1", m.Payload);
+				});
+
+			publisher.Publish("*", new Message {Payload = "payload1"});
 
 			Assert.IsTrue(r.WaitOne(_timeout), "Timed out");
 
-            publisher.Dispose();
-            subscriber.Dispose();
-        }
+			publisher.Dispose();
+			subscriber.Dispose();
+		}
+
+		[Test]
+		public void Subscriber_client_induced_failover()
+		{
+			var publisher1 = new Publisher();
+			var publisher2 = new Publisher();
+
+			var r = new [] {new ManualResetEvent(false), new ManualResetEvent(false)};
+			var rc = new Dictionary<IPEndPoint, ManualResetEvent>
+			{
+				{publisher1.EndPoint, new ManualResetEvent(false)},
+				{publisher2.EndPoint, new ManualResetEvent(false)},
+			};
+			int c = 0;
+
+			var subscriber = new Subscriber(new []{publisher1.EndPoint, publisher2.EndPoint});
+
+			subscriber.Subscribe<Message>("*", m =>
+				{
+					var c1 = Interlocked.Increment(ref c);
+					r[c1-1].Set();
+					Assert.AreEqual("payload" + c1, m.Payload);
+				}, ep => rc[ep].Set());
+
+			Assert.IsTrue (rc [publisher1.EndPoint].WaitOne (_timeout));
+			publisher1.Publish("*", new Message {Payload = "payload1"});
+			Assert.IsTrue(r[0].WaitOne(_timeout), "Timed out");
+
+			subscriber.FailOver ();
+
+			Assert.IsTrue (rc [publisher2.EndPoint].WaitOne (_timeout));
+			publisher2.Publish("*", new Message {Payload = "payload2"});
+			Assert.IsTrue(r[1].WaitOne(_timeout), "Timed out");
+
+			publisher1.Dispose();
+			publisher2.Dispose();
+			subscriber.Dispose();
+		}
 
         [Test]
         public void Publish_different_topics()
