@@ -7,14 +7,15 @@ namespace ProtobufSockets.Stats
     {
         private readonly List<PublisherClientStats> _clients;
 
-        public PublisherStats(IEnumerable<PublisherClientStats> clients)
+        public PublisherStats(IEnumerable<PublisherClientStats> clients, SystemStats systemStats)
         {
+            SystemStats = systemStats;
             _clients = clients.ToList();
+            NumberOfSubscribers = _clients.Count;
         }
 
-        public IEnumerable<PublisherClientStats> Clients
-        {
-            get { return _clients; }
-        }
+        public IEnumerable<PublisherClientStats> Clients { get { return _clients; } }
+        public int NumberOfSubscribers { get; private set; }
+        public SystemStats SystemStats { get; private set; }
     }
 }

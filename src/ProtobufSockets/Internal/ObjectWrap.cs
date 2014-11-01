@@ -2,10 +2,10 @@
 
 namespace ProtobufSockets.Internal
 {
-    internal class ObjectWrap
+    class ObjectWrap
     {
-        public Type Type;
-        public object Object;
-        public string Topic;
+        internal Type Type;
+        internal object Object;
+        internal string Topic;
     }
 }

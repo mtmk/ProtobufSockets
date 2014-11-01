@@ -12,7 +12,6 @@ namespace ProtobufSockets.TestGui
         private readonly IPEndPoint _endPoint;
         private Publisher _publisher;
         private int _started;
-
         private readonly object _sync = new object();
 
         public PublisherWindow(string text, int i)
@@ -33,7 +32,7 @@ namespace ProtobufSockets.TestGui
                 {
                     if (_publisher != null)
                     {
-                        PublisherTextBox.Text = JsonConvert.SerializeObject(_publisher.GetStats(), Formatting.Indented);
+                        PublisherTextBox.Text = JsonConvert.SerializeObject(_publisher.GetStats(true), Formatting.Indented);
                     }
                     else
                     {
@@ -49,6 +48,8 @@ namespace ProtobufSockets.TestGui
 
         private void Publisher_Start_Button_Click(object sender, RoutedEventArgs e)
         {
+            if (Interlocked.CompareExchange(ref _started, 0, 0) == 1) return;
+
             lock (_sync)
                 _publisher = new Publisher(_endPoint);
 

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using Newtonsoft.Json;
 using ProtobufSockets.Tests;
 
@@ -30,14 +31,14 @@ namespace ProtobufSockets.TestGui
                 .Select(e => e.ToString())
                 .Aggregate((a, b) => a + " " + b);
 
-            var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            var dispatcherTimer = new DispatcherTimer();
             dispatcherTimer.Tick += (_, e) =>
             {
                 lock (_sync)
                 {
                     if (_subscriber != null)
                     {
-                        SubscriberTextBox.Text = JsonConvert.SerializeObject(_subscriber.GetStats(), Formatting.Indented);
+                        SubscriberTextBox.Text = JsonConvert.SerializeObject(_subscriber.GetStats(true), Formatting.Indented);
                     }
                     else
                     {
@@ -54,7 +55,10 @@ namespace ProtobufSockets.TestGui
         private void Subscriber_Start_Button_Click(object sender, RoutedEventArgs e)
         {
             lock (_sync)
+            {
+                if (_subscriber != null) return;
                 _subscriber = new Subscriber(_endPoints, Title);
+            }
 
             int i = 0;
             _subscriber.Subscribe<Message>(m =>

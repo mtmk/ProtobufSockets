@@ -1,15 +1,11 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 using ProtoBuf;
-using Xunit;
 
 namespace ProtobufSockets.Tests
 {
@@ -19,9 +15,10 @@ namespace ProtobufSockets.Tests
         {
             if (args.Length == 0 || args[0] == "test")
             {
-				new PubSubTests ().Multiple_publishers_and_subscribers_with_failover ();
-				new PubSubTests ().Publisher_starts_with_an_ephemeral_port ();
-				new PubSubTests ().Publish_different_topics ();
+				new PubSubTests().Multiple_publishers_and_subscribers_with_failover();
+				new PubSubTests().Publisher_starts_with_an_ephemeral_port();
+				new PubSubTests().Publish_different_topics();
+				new PubSubTests().Subscriber_client_induced_failover();
 				return 0;
            } 
 

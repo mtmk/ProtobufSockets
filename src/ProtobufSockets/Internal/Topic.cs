@@ -1,6 +1,6 @@
 namespace ProtobufSockets.Internal
 {
-    internal static class Topic
+    static class Topic
     {
         internal static bool Match(string topic, string test)
         {

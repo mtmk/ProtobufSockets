@@ -7,6 +7,7 @@
             int backlog,
             string endPoint,
             string topic,
+            string type,
             long messageCount)
         {
 			Name = name;
@@ -14,6 +15,7 @@
 			Backlog = backlog;
 			EndPoint = endPoint;
             Topic = topic;
+            Type = type;
             MessageCount = messageCount;
         }
 
@@ -22,6 +24,7 @@
         public int Backlog { get; private set; }
         public string EndPoint { get; private set; }
         public string Topic { get; private set; }
+        public string Type { get; private set; }
         public long MessageCount { get; private set; }
     }
 }

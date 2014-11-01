@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -10,10 +11,10 @@ namespace ProtobufSockets
 {
     public class Publisher : IDisposable
     {
-        private const LogTag Tag = LogTag.Publisher;
+        const LogTag Tag = LogTag.Publisher;
 
-        private readonly TcpListener _listener;
-        private readonly PublisherSubscriptionStore _store;
+        readonly TcpListener _listener;
+        readonly PublisherSubscriptionStore _store;
 
         public Publisher() : this(new IPEndPoint(IPAddress.Loopback, 0))
         {
@@ -47,15 +48,15 @@ namespace ProtobufSockets
 
             foreach (var client in _store.Subscriptions)
             {
-                Log.Debug(Tag, "publishing message..");
+                Log.Debug(Tag, "Publishing message..");
 
                 if (!Topic.Match(client.Topic, topic)) continue;
-                
+
                 client.Send(topic, typeof(T), message);
             }
         }
 
-        public PublisherStats GetStats()
+        public PublisherStats GetStats(bool withSystemStats = false)
         {
             var clients = _store.Subscriptions
                 .Select(client => new PublisherClientStats(
@@ -64,74 +65,98 @@ namespace ProtobufSockets
                     client.Backlog,
                     client.EndPoint,
                     client.Topic,
+                    client.Type,
                     client.MessageCount))
                 .ToList();
 
-            return new PublisherStats(clients);
+            var statsBuilder = new SystemStatsBuilder();
+            if (withSystemStats)
+                statsBuilder.ReadInFromCurrentProcess();
+
+            return new PublisherStats(clients, statsBuilder.Build());
         }
 
         public void Dispose()
         {
-            Log.Info(Tag, "disposing..");
+            Log.Info(Tag, "Disposing.");
 
             foreach (var client in _store.Subscriptions)
             {
-                Log.Debug(Tag, "closing client..");
+                Log.Debug(Tag, "Closing client " + (client.Name ?? "<null>") +" ["+ (client.EndPoint ?? "<null>") + "]");
                 client.Close();
             }
 
             _listener.Stop();
         }
 
-        private void ClientAccept(IAsyncResult ar)
+        void ClientAccept(IAsyncResult ar)
         {
-            TcpClient tcpClient;
+            Log.Debug(Tag, "Accepting client connections.");
 
-			try
+            TcpClient tcpClient;
+            try
             {
                 tcpClient = _listener.EndAcceptTcpClient(ar);
+                Log.Info(Tag, "A client connection is accepted.");
             }
-			catch (NullReferenceException)
-			{
-				return; // Listener already stopped
-			}
+            catch (NullReferenceException)
+            {
+                return; // Listener already stopped
+            }
             catch (InvalidOperationException)
             {
-				return; // Listener already stopped
+                return; // Listener already stopped
             }
 
             _listener.BeginAcceptTcpClient(ClientAccept, null);
 
             Socket socket = null;
+            var success = false;
             try
             {
                 tcpClient.NoDelay = true;
                 tcpClient.LingerState.Enabled = true;
                 tcpClient.LingerState.LingerTime = 0;
 
-                Log.Info(Tag, "client connected..");
-
                 NetworkStream networkStream = tcpClient.GetStream();
 
                 socket = tcpClient.Client;
 
-				// handshake
+                // handshake
                 var header = Serializer.DeserializeWithLengthPrefix<Header>(networkStream, PrefixStyle.Base128);
-				Log.Info(Tag, "client topic is.. " + (header.Topic ?? "<null>"));
-				Log.Info(Tag, "client name is.. " + (header.Name ?? "<null>"));
 
-				var client = new PublisherClient(tcpClient, networkStream, header, _store);
-				_store.Add(socket, client);
+                Log.Info(Tag, "Client connected with topic " + (header.Topic ?? "<null>") + " and name " + (header.Name ?? "<null>"));
 
-				// send ack
-				Serializer.SerializeWithLengthPrefix(networkStream, "OK", PrefixStyle.Base128);
+                var client = new PublisherClient(tcpClient, networkStream, header, _store);
+                
+                _store.Add(socket, client);
+
+                // send ack
+                Serializer.SerializeWithLengthPrefix(networkStream, "OK", PrefixStyle.Base128);
+
+                success = true;
+
+                Log.Debug(Tag, "Successfully connected " + socket.RemoteEndPoint);
             }
-            catch (Exception e)
+            catch (ProtoSerialiserException)
             {
-                Log.Fatal(Tag, "UNEXPECTED_ERROR_PUB1: {0} : {1}", e.GetType(), e.Message);
-                _store.Remove(socket);
-                tcpClient.Close();
+                Log.Error(Tag, "ProtoSerialiserException");
             }
+            catch (SocketException e)
+            {
+                Log.Error(Tag, "SocketException: " + e.Message + " [SocketErrorCode:" + e.SocketErrorCode + "]");
+            }
+            catch (IOException e)
+            {
+                Log.Error(Tag, "IOException: " + e.Message);
+            }
+
+            if (success) return;
+
+            Log.Debug(Tag, "Connection unsuccessful.");
+
+            _store.Remove(socket);
+            tcpClient.Close();
         }
     }
 }

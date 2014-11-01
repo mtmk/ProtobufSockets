@@ -11,11 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pbspub", "pbspub\pbspub.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pbssub", "pbssub\pbssub.csproj", "{D3A47ABE-EAA1-41C3-B52D-ADA7CABE0C12}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{13574280-C6ED-4B9F-B1B5-D3CD90429A1E}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtobufSockets.TestGui", "ProtobufSockets.TestGui\ProtobufSockets.TestGui.csproj", "{495E0403-9266-4EB9-AEC0-130F9AFE1D39}"
 EndProject
 Global

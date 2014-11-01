@@ -55,6 +55,8 @@
     <Compile Include="Stats\PublisherClientStats.cs" />
     <Compile Include="Stats\PublisherStats.cs" />
     <Compile Include="Stats\SubscriberStats.cs" />
+    <Compile Include="Stats\SystemStats.cs" />
+    <Compile Include="Stats\SystemStatsBuilder.cs" />
     <Compile Include="Subscriber.cs" />
     <Compile Include="Internal\Topic.cs" />
     <Compile Include="Internal\SubscriberClient.cs" />

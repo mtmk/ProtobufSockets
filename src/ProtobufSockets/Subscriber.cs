@@ -24,6 +24,8 @@ namespace ProtobufSockets
 
 		int _connected;
         int _reconnect;
+        long _lastCount;
+        long _totalCount;
 		string _currentEndPoint;
 		string _statTopic;
 		string _statType;
@@ -61,7 +63,9 @@ namespace ProtobufSockets
 					Interlocked.Exchange (ref _connected, 1);
 					if (connected != null) connected(ep);
 				};
-			}
+
+                Log.Info(Tag, "Subscribing to " + (topic ?? "<null>") + " as " + (_name ?? "<null>") + " with type " + _type.FullName);
+            }
 
             Connect();
         }
@@ -71,7 +75,7 @@ namespace ProtobufSockets
             CloseClient();
         }
 
-		public SubscriberStats GetStats()
+        public SubscriberStats GetStats(bool withSystemStats = false)
 		{
 			string currentEndPoint;
 			string topic;
@@ -84,15 +88,29 @@ namespace ProtobufSockets
 			}
 
 			long count = 0;
+			long totalCount;
 			lock (_clientSync)
 			{
 				if (_client != null)
 					count = _client.GetMessageCount();
+
+			    if (count < _lastCount)
+			        _lastCount = 0;
+
+                _totalCount += count - _lastCount;
+			    
+                _lastCount = count;
+
+			    totalCount = _totalCount;
 			}
+
+            var statsBuilder = new SystemStatsBuilder();
+            if (withSystemStats)
+                statsBuilder.ReadInFromCurrentProcess();
 
 			return new SubscriberStats(Interlocked.CompareExchange(ref _connected, 0, 0) == 1,
 				Interlocked.CompareExchange(ref _reconnect, 0, 0),
-				count, currentEndPoint, _statEndPoints, topic, type, _name);
+				count, totalCount, currentEndPoint, _statEndPoints, topic, type, _name, statsBuilder.Build());
 		}
 
         public void Dispose()
@@ -103,10 +121,15 @@ namespace ProtobufSockets
 
         void CloseClient()
         {
+            Log.Debug(Tag, "Closing client.");
+            Interlocked.Exchange(ref _connected, 0);
             lock (_clientSync)
             {
                 if (_client != null)
+                {
+                    Log.Debug(Tag, "Disposing client.");
                     _client.Dispose();
+                }
                 _client = null;
             }
         }
@@ -114,6 +137,8 @@ namespace ProtobufSockets
         void Connect()
         {
 			lock (_disposeSync) if (_disposed) return;
+
+            Log.Debug(Tag, "Connecting..");
 
 			// copy mutables
 			Type type;
@@ -137,6 +162,9 @@ namespace ProtobufSockets
                     _indexEndPoint = 0;
 				indexEndPoint = _indexEndPoint;
 			}
+            IPEndPoint endPoint = _endPoints[indexEndPoint];
+
+            Log.Info(Tag, "Connecting to " + endPoint);
 
 			// Update stats
 			lock (_statSync)
@@ -148,43 +176,40 @@ namespace ProtobufSockets
 
             CloseClient();
 
-			// connect
-			var client = SubscriberClient.Connect(
-				_endPoints[indexEndPoint],
-				_name,
-				topic,
-				type,
-				action,
-				Disconnected);
+            var client = SubscriberClient.Connect(endPoint, _name, topic, type, action, Disconnected);
 
 			if (client != null)
 			{
-				connectedAction (_endPoints [indexEndPoint]);
+			    Log.Info(Tag, "Connection successful to " + endPoint);
+				connectedAction(endPoint);
 				lock (_clientSync)
 					_client = client;
 			}
 			else
 			{
-				Reconnect();
+                Log.Info(Tag, "Connection unsuccessful for " + endPoint + ". Will reconnect..");
+                Reconnect();
 			}
         }
 
 		void Disconnected(IPEndPoint ep)
 		{
-			Interlocked.Exchange(ref _connected, 0);
-			Reconnect();
+            Log.Debug(Tag, "Disconnected from " + ep);
+            Reconnect();
 		}
 
         void Reconnect()
         {
-            Interlocked.Increment(ref _reconnect);
-            
-			if (!Monitor.TryEnter(_reconnectSync)) return;
+			if (!Monitor.TryEnter(_reconnectSync)) return; // do not queue up simultaneous calls
             try
             {
+                Interlocked.Exchange(ref _connected, 0);
+                Interlocked.Increment(ref _reconnect);
+
                 if (_reconnectTimer != null)
                     _reconnectTimer.Dispose();
-                
+
+                Log.Debug(Tag, "Running reconnect timer..");
                 _reconnectTimer = new Timer(_ => Connect(), null, 700, Timeout.Infinite);
             }
             finally

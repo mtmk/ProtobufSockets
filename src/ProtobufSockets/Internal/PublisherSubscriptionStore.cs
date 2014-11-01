@@ -4,16 +4,16 @@ using System.Net.Sockets;
 
 namespace ProtobufSockets.Internal
 {
-    internal class PublisherSubscriptionStore
+    class PublisherSubscriptionStore
     {
-        private readonly ConcurrentDictionary<Socket, PublisherClient> _cs = new ConcurrentDictionary<Socket, PublisherClient>();
+        readonly ConcurrentDictionary<Socket, PublisherClient> _cs = new ConcurrentDictionary<Socket, PublisherClient>();
 
-        public IEnumerable<PublisherClient> Subscriptions
+        internal IEnumerable<PublisherClient> Subscriptions
         {
             get { return _cs.Values; }
         }
 
-        public void Remove(Socket socket)
+        internal void Remove(Socket socket)
         {
             if (socket == null) return;
 
@@ -21,7 +21,7 @@ namespace ProtobufSockets.Internal
             _cs.TryRemove(socket, out _);
         }
 
-        public void Add(Socket socket, PublisherClient client)
+        internal void Add(Socket socket, PublisherClient client)
         {
             _cs.TryAdd(socket, client);
         }

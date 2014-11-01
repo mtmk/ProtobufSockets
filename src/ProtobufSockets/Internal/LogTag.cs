@@ -1,6 +1,6 @@
 namespace ProtobufSockets.Internal
 {
-    internal enum LogTag
+    enum LogTag
     {
         Publisher = 1,
         PublisherClient = 2,

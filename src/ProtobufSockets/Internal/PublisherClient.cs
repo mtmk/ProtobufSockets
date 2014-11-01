@@ -6,23 +6,23 @@ using System.Threading;
 
 namespace ProtobufSockets.Internal
 {
-    internal class PublisherClient
+    class PublisherClient
     {
-        private const LogTag Tag = LogTag.PublisherClient;
+        const LogTag Tag = LogTag.PublisherClient;
 
-        private readonly ProtoSerialiser _serialiser = new ProtoSerialiser();
-        private readonly BlockingCollection<ObjectWrap> _q = new BlockingCollection<ObjectWrap>(1000);
-        private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
-        private readonly TcpClient _tcpClient;
-        private readonly NetworkStream _networkStream;
-        private readonly PublisherSubscriptionStore _store;
-        private readonly Thread _consumerThread;
-        private readonly string _topic;
-        private readonly string _endPoint;
-        private readonly string _name;
-        private readonly string _type;
-		private int _messageLoss;
-        private long _count;
+        readonly ProtoSerialiser _serialiser = new ProtoSerialiser();
+        readonly BlockingCollection<ObjectWrap> _q = new BlockingCollection<ObjectWrap>(1000);
+        readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
+        readonly TcpClient _tcpClient;
+        readonly NetworkStream _networkStream;
+        readonly PublisherSubscriptionStore _store;
+        readonly Thread _consumerThread;
+        readonly string _topic;
+        readonly string _endPoint;
+        readonly string _name;
+        readonly string _type;
+		int _messageLoss;
+        long _count;
 
 		internal PublisherClient(TcpClient tcpClient, NetworkStream networkStream, Header header, PublisherSubscriptionStore store)
         {
@@ -39,18 +39,12 @@ namespace ProtobufSockets.Internal
         }
 
 		internal string Topic { get { return _topic; } }
-
         internal string EndPoint { get { return _endPoint; } }
-
         internal int MessageLoss { get { return Interlocked.CompareExchange(ref _messageLoss, 0, 0); } }
-
-        public string Name { get { return _name; } }
-
-        public string Type { get { return _type; } }
-
-        public int Backlog { get { return _q.Count; } }
-
-        public long MessageCount { get { return Interlocked.CompareExchange(ref _count, 0, 0); } }
+        internal string Name { get { return _name; } }
+        internal string Type { get { return _type; } }
+        internal int Backlog { get { return _q.Count; } }
+        internal long MessageCount { get { return Interlocked.CompareExchange(ref _count, 0, 0); } }
 
         internal void Send(string topic, Type type, object message)
         {
@@ -62,22 +56,29 @@ namespace ProtobufSockets.Internal
                 {
                     Interlocked.Increment(ref _messageLoss);
                 }
-                Log.Debug(Tag, "message queued to be sent..");
+                Log.Debug(Tag, "Message queued.");
             }
-            catch (OperationCanceledException) { }
-            catch (InvalidOperationException) { }
+            catch (OperationCanceledException)
+            {
+                Log.Debug(Tag, "Send: OperationCanceledException");
+            }
+            catch (InvalidOperationException)
+            {
+                Log.Debug(Tag, "Send: InvalidOperationException");
+            }
         }
 			
         internal void Close()
         {
+            Log.Debug(Tag, "Closing.");
             _cancellation.Cancel();
             _tcpClient.Close();
             _consumerThread.Join();
         }
 
-        private void Consumer()
+        void Consumer()
         {
-            Log.Info(Tag, "starting client consumer..");
+            Log.Info(Tag, "Starting client consumer [" + Thread.CurrentThread.ManagedThreadId + "]");
             CancellationToken token = _cancellation.Token;
 
             while (true)
@@ -85,7 +86,7 @@ namespace ProtobufSockets.Internal
                 try
                 {
                     ObjectWrap take = _q.Take(token);
-                    Log.Debug(Tag, "dequeue message to send over wire..");
+                    Log.Debug(Tag, "Got message to send over wire.");
 
                     var header = new Header {Type = take.Type.FullName, Topic = take.Topic};
                     _serialiser.Serialise(_networkStream, header);
@@ -93,19 +94,17 @@ namespace ProtobufSockets.Internal
                 }
                 catch (InvalidOperationException)
                 {
+                    Log.Debug(Tag, "Consumer: InvalidOperationException");
                     break;
                 }
                 catch (OperationCanceledException)
                 {
+                    Log.Debug(Tag, "Consumer: OperationCanceledException");
                     break;
                 }
-                catch (IOException)
+                catch (IOException e)
                 {
-                    break;
-                }
-                catch (Exception e)
-                {
-                    Log.Error(Tag, "UNEXPECTED_ERROR_CLI1: {0} : {1}", e.GetType(), e.Message);
+                    Log.Debug(Tag, "Consumer: IOException: " + e.Message);
                     break;
                 }
             }
@@ -113,7 +112,7 @@ namespace ProtobufSockets.Internal
             _store.Remove(_tcpClient.Client);
             _tcpClient.Close();
 
-            Log.Info(Tag, "exiting client consumer..");
+            Log.Info(Tag, "Exiting client consumer [" + Thread.CurrentThread.ManagedThreadId + "]");
         }
     }
 }
