@@ -92,26 +92,13 @@ namespace ProtobufSockets
 
 			return new SubscriberStats(Interlocked.CompareExchange(ref _connected, 0, 0) == 1,
 				Interlocked.CompareExchange(ref _reconnect, 0, 0),
-				count,
-				currentEndPoint,
-				_statEndPoints,
-				topic,
-				type,
-				_name);
+				count, currentEndPoint, _statEndPoints, topic, type, _name);
 		}
 
         public void Dispose()
         {
 			lock (_disposeSync) _disposed = true;
-
-			lock (_clientSync)
-			{
-				if (_client != null)
-				{
-					_client.Dispose();
-					_client = null;
-				}
-			}
+            CloseClient();
         }
 
         void CloseClient()
@@ -195,15 +182,8 @@ namespace ProtobufSockets
 			if (!Monitor.TryEnter(_reconnectSync)) return;
             try
             {
-                try
-                {
-                    if (_reconnectTimer != null)
-                        _reconnectTimer.Dispose();
-                }
-                catch (Exception e)
-                {
-                    Log.Fatal(Tag, "UNEXPECTED_ERROR_SUB3: {0} : {1}", e.GetType(), e.Message);
-                }
+                if (_reconnectTimer != null)
+                    _reconnectTimer.Dispose();
                 
                 _reconnectTimer = new Timer(_ => Connect(), null, 700, Timeout.Infinite);
             }
