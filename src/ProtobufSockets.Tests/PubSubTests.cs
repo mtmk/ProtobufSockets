@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading;
 using NUnit.Framework;
+using System;
 
 namespace ProtobufSockets.Tests
 {
@@ -173,7 +174,5 @@ namespace ProtobufSockets.Tests
             subscriber1.Dispose();
             subscriber2.Dispose();
         }
-
-
     }
 }

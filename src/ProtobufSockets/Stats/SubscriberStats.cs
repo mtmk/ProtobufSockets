@@ -4,7 +4,7 @@
     {
         public SubscriberStats(bool connected,
             int reconnectCount,
-            int messageCount,
+            long messageCount,
             string currentEndPoint,
             string[] endPoints,
             string topic,
@@ -23,7 +23,7 @@
 
         public bool Connected { get; private set; }
         public int ReconnectCount { get; private set; }
-        public int MessageCount { get; private set; }
+        public long MessageCount { get; private set; }
         public string CurrentEndPoint { get; private set; }
         public string[] EndPoints { get; private set; }
         public string Topic { get; private set; }

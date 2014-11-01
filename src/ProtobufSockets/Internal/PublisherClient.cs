@@ -8,34 +8,37 @@ namespace ProtobufSockets.Internal
 {
     internal class PublisherClient
     {
-        private const LogTag Tag = LogTag.Client;
+        private const LogTag Tag = LogTag.PublisherClient;
 
         private readonly ProtoSerialiser _serialiser = new ProtoSerialiser();
-        private readonly ManualResetEvent _connected = new ManualResetEvent(false);
         private readonly BlockingCollection<ObjectWrap> _q = new BlockingCollection<ObjectWrap>(1000);
         private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
         private readonly TcpClient _tcpClient;
         private readonly NetworkStream _networkStream;
         private readonly PublisherSubscriptionStore _store;
         private readonly Thread _consumerThread;
-        private string _topic;
-        private int _messageLoss;
+        private readonly string _topic;
         private readonly string _endPoint;
-        private string _name;
-        private string _type;
+        private readonly string _name;
+        private readonly string _type;
+		private int _messageLoss;
         private long _count;
 
-        internal PublisherClient(TcpClient tcpClient, NetworkStream networkStream, PublisherSubscriptionStore store)
+		internal PublisherClient(TcpClient tcpClient, NetworkStream networkStream, Header header, PublisherSubscriptionStore store)
         {
             _tcpClient = tcpClient;
             _networkStream = networkStream;
             _store = store;
-            _endPoint = tcpClient.Client.RemoteEndPoint.ToString();
+			_topic = header.Topic;
+			_name = header.Name;
+			_type = header.Type;
+			_endPoint = tcpClient.Client.RemoteEndPoint.ToString();
+
             _consumerThread = new Thread(Consumer) { IsBackground = true };
             _consumerThread.Start();
         }
 
-        internal string Topic { get { return _topic; } }
+		internal string Topic { get { return _topic; } }
 
         internal string EndPoint { get { return _endPoint; } }
 
@@ -64,15 +67,7 @@ namespace ProtobufSockets.Internal
             catch (OperationCanceledException) { }
             catch (InvalidOperationException) { }
         }
-
-        internal void SetServerAck(Header header)
-        {
-            _topic = header.Topic;
-            _name = header.Name;
-            _type = header.Type;
-            _connected.Set();
-        }
-
+			
         internal void Close()
         {
             _cancellation.Cancel();
@@ -85,7 +80,6 @@ namespace ProtobufSockets.Internal
             Log.Info(Tag, "starting client consumer..");
             CancellationToken token = _cancellation.Token;
 
-            _connected.WaitOne();
             while (true)
             {
                 try
@@ -93,7 +87,7 @@ namespace ProtobufSockets.Internal
                     ObjectWrap take = _q.Take(token);
                     Log.Debug(Tag, "dequeue message to send over wire..");
 
-                    var header = new Header {Type = take.Type.Name, Topic = take.Topic};
+                    var header = new Header {Type = take.Type.FullName, Topic = take.Topic};
                     _serialiser.Serialise(_networkStream, header);
                     _serialiser.Serialise(_networkStream, take.Type, take.Object);
                 }

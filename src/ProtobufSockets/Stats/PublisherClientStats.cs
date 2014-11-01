@@ -9,11 +9,11 @@
             string topic,
             long messageCount)
         {
+			Name = name;
+			MessageLoss = messageLoss;
+			Backlog = backlog;
+			EndPoint = endPoint;
             Topic = topic;
-            EndPoint = endPoint;
-            MessageLoss = messageLoss;
-            Backlog = backlog;
-            Name = name;
             MessageCount = messageCount;
         }
 

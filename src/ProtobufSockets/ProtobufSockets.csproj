@@ -57,6 +57,7 @@
     <Compile Include="Stats\SubscriberStats.cs" />
     <Compile Include="Subscriber.cs" />
     <Compile Include="Internal\Topic.cs" />
+    <Compile Include="Internal\SubscriberClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

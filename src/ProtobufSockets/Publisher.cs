@@ -113,21 +113,22 @@ namespace ProtobufSockets
 
                 NetworkStream networkStream = tcpClient.GetStream();
 
-                var client = new PublisherClient(tcpClient, networkStream, _store);
-
                 socket = tcpClient.Client;
 
+				// handshake
                 var header = Serializer.DeserializeWithLengthPrefix<Header>(networkStream, PrefixStyle.Base128);
-                Log.Info(Tag, "client topic is.. " + header.Topic);
+				Log.Info(Tag, "client topic is.. " + (header.Topic ?? "<null>"));
+				Log.Info(Tag, "client name is.. " + (header.Name ?? "<null>"));
 
+				var client = new PublisherClient(tcpClient, networkStream, header, _store);
 				_store.Add(socket, client);
-				client.SetServerAck(header);
 
-                Serializer.SerializeWithLengthPrefix(networkStream, "OK", PrefixStyle.Base128);
+				// send ack
+				Serializer.SerializeWithLengthPrefix(networkStream, "OK", PrefixStyle.Base128);
             }
             catch (Exception e)
             {
-                Log.Error(Tag, "UNEXPECTED_ERROR_PUB1: {0} : {1}", e.GetType(), e.Message);
+                Log.Fatal(Tag, "UNEXPECTED_ERROR_PUB1: {0} : {1}", e.GetType(), e.Message);
                 _store.Remove(socket);
                 tcpClient.Close();
             }
