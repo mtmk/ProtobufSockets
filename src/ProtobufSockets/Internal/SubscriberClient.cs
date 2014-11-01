@@ -92,6 +92,8 @@ namespace ProtobufSockets.Internal
 
 		public void Dispose()
 		{
+            if (Interlocked.CompareExchange(ref _disposed, 0, 0) == 1) return;
+
 			Interlocked.Exchange(ref _disposed, 1);
 			try { _networkStream.Close(); } catch { }
 			try { _tcpClient.Close(); } catch { }

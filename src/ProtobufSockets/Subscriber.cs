@@ -68,7 +68,7 @@ namespace ProtobufSockets
 
         public void FailOver()
         {
-            Reconnect();
+            CloseClient();
         }
 
 		public SubscriberStats GetStats()
@@ -114,6 +114,16 @@ namespace ProtobufSockets
 			}
         }
 
+        void CloseClient()
+        {
+            lock (_clientSync)
+            {
+                if (_client != null)
+                    _client.Dispose();
+                _client = null;
+            }
+        }
+
         void Connect()
         {
 			lock (_disposeSync) if (_disposed) return;
@@ -149,13 +159,7 @@ namespace ProtobufSockets
 				_statTopic = topic;
 			}
 
-			// clear earlie connection
-			lock(_clientSync)
-			{
-				if (_client != null)
-					_client.Dispose();
-				_client = null;
-			}
+            CloseClient();
 
 			// connect
 			var client = SubscriberClient.Connect(
