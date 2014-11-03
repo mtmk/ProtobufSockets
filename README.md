@@ -11,46 +11,49 @@ Example
 Here is the basic scenario where you can have an example up and running in a few minutes:
 
 Define your messages:
-
-    [ProtoContract]
-    public class Message
-    {
-        [ProtoMember(1)]
-        public string Payload { get; set; }
-    }
+```cs
+[ProtoContract]
+public class Message
+{
+    [ProtoMember(1)]
+    public string Payload { get; set; }
+}
+```
 
 Run publisher:
-
-    static void Main()
+```cs
+static void Main()
+{
+    using (var publisher = new Publisher(new IPEndPoint(IPAddress.Any, 34567)))
     {
-        using (var publisher = new Publisher(new IPEndPoint(IPAddress.Any, 34567)))
+        int i = 1;
+        while (true)
         {
-            int i = 1;
-            while (true)
-            {
-                Console.WriteLine("Publishing message #" + i);
-                publisher.Publish(new Message {Payload = "payload" + i});
-                i++;
-                Thread.Sleep(1000);
-            }
+            Console.WriteLine("Publishing message #" + i);
+            publisher.Publish(new Message {Payload = "payload" + i});
+            i++;
+            Thread.Sleep(1000);
         }
     }
+}
+```
 
 Run subscriber:
-
-    static void Main()
+```cs
+static void Main()
+{
+    using (var subscriber = new Subscriber(new[] {new IPEndPoint(IPAddress.Loopback, 34567)}))
     {
-        using (var subscriber = new Subscriber(new[] {new IPEndPoint(IPAddress.Loopback, 34567)}))
+        subscriber.Subscribe<Message>(m =>
         {
-            subscriber.Subscribe<Message>(m =>
-            {
-                Console.WriteLine("Received: {0}", m.Payload);
-            });
+            Console.WriteLine("Received: {0}", m.Payload);
+        });
 
-            Console.ReadLine();
-        }
-
+        Console.ReadLine();
     }
+
+}
+```
 
 Disclamer
 =========
