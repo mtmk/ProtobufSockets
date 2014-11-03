@@ -8,22 +8,49 @@ Simple .Net socket wrapper aimed at PubSub using protobuf-net. It supports simpl
 Example
 =======
 
-    var r = new ManualResetEvent(false);
-    var publisher = new Publisher();
-    var subscriber = new Subscriber(new []{publisher.EndPoint});
+Here is the basic scenario where you can have an example up and running in a few minutes:
 
-    subscriber.Subscribe<Message>("*", m =>
+Define your messages:
+
+    [ProtoContract]
+    public class Message
     {
-        r.Set();
-        Assert.Equal("payload1", m.Payload);
-    });
+        [ProtoMember(1)]
+        public string Payload { get; set; }
+    }
 
-    publisher.Publish("*", new Message {Payload = "payload1"});
+Run publisher:
 
-    Assert.True(r.WaitOne(3000), "Timed out");
+    static void Main()
+    {
+        using (var publisher = new Publisher(new IPEndPoint(IPAddress.Any, 34567)))
+        {
+            int i = 1;
+            while (true)
+            {
+                Console.WriteLine("Publishing message #" + i);
+                publisher.Publish(new Message {Payload = "payload" + i});
+                i++;
+                Thread.Sleep(1000);
+            }
+        }
+    }
 
-    publisher.Dispose();
-    subscriber.Dispose();
+Run subscriber:
+
+    static void Main()
+    {
+        using (var subscriber = new Subscriber(new[] {new IPEndPoint(IPAddress.Loopback, 34567)}))
+        {
+            subscriber.Subscribe<Message>(m =>
+            {
+                Console.WriteLine("Received: {0}", m.Payload);
+            });
+
+            Console.ReadLine();
+        }
+
+    }
 
 Disclamer
 =========
