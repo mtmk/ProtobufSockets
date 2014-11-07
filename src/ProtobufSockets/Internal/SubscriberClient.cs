@@ -110,12 +110,12 @@ namespace ProtobufSockets.Internal
                         "Received header [name=" + (header.Name ?? "<null>") + " type=" + (header.Type ?? "<null>") +
                         " topic=" + (header.Topic ?? "<null>") + "]");
 
-                    if (header.Type != typeName)
-                    {
-                        Log.Debug(Tag, "Ignoring unmatched type. (Subscribed with wrong type?)");
-                        _serialiser.Chew(_networkStream);
-                        continue;
-                    }
+//                    if (header.Type != typeName)
+//                    {
+//                        Log.Debug(Tag, "Ignoring unmatched type. (Subscribed with wrong type?)");
+//                        _serialiser.Chew(_networkStream);
+//                        continue;
+//                    }
 
                     var message = _serialiser.Deserialize(_networkStream, _type);
 
