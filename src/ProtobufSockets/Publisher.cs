@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using ProtoBuf;
 using ProtobufSockets.Internal;
 using ProtobufSockets.Stats;
 
@@ -15,6 +14,7 @@ namespace ProtobufSockets
 
         readonly TcpListener _listener;
         readonly PublisherSubscriptionStore _store;
+        readonly ProtoSerialiser _serialiser = new ProtoSerialiser();
 
         public Publisher() : this(new IPEndPoint(IPAddress.Loopback, 0))
         {
@@ -123,7 +123,7 @@ namespace ProtobufSockets
                 socket = tcpClient.Client;
 
                 // handshake
-                var header = Serializer.DeserializeWithLengthPrefix<Header>(networkStream, PrefixStyle.Base128);
+                var header = _serialiser.Deserialize<Header>(networkStream);
 
                 Log.Info(Tag, "Client connected with topic " + (header.Topic ?? "<null>") + " and name " + (header.Name ?? "<null>"));
 
@@ -132,7 +132,7 @@ namespace ProtobufSockets
                 _store.Add(socket, client);
 
                 // send ack
-                Serializer.SerializeWithLengthPrefix(networkStream, "OK", PrefixStyle.Base128);
+                _serialiser.Serialise(networkStream, "OK");
 
                 success = true;
 

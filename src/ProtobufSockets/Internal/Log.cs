@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 namespace ProtobufSockets.Internal
 {
@@ -12,6 +13,7 @@ namespace ProtobufSockets.Internal
             { LogTag.PublisherClient, new TraceSource("ProtobufSockets.PublisherClient") },
             { LogTag.Subscriber, new TraceSource("ProtobufSockets.Subscriber") },
             { LogTag.SubscriberClient, new TraceSource("ProtobufSockets.SubscriberClient") },
+            { LogTag.ProtoSerialiser, new TraceSource("ProtobufSockets.ProtoSerialiser") },
         };
             
 
@@ -34,8 +36,47 @@ namespace ProtobufSockets.Internal
 
         static void Write(TraceEventType level, LogTag tag, string format, params object[] args)
         {
-            var msg = string.Format("{0:yyyy-MM-dd HH:mm:ss} [{1}] {2}", DateTime.Now, tag, string.Format(format, args));
+            string s;
+            try
+            {
+                s = string.Format(format, args);
+            }
+            catch (ArgumentNullException)
+            {
+                s = RecoverFormat(format, args);
+            }
+            catch (FormatException)
+            {
+                s = RecoverFormat(format, args);
+            }
+
+            var msg = string.Format("{0:yyyy-MM-dd HH:mm:ss} [{1}] {2}", DateTime.Now, tag, s);
             TraceSource[tag].TraceEvent(level, (int)tag, msg);
+        }
+
+        static string RecoverFormat(string format, IEnumerable<object> args)
+        {
+            var sb = new StringBuilder();
+
+            if (format != null)
+            {
+                sb.Append(":");
+                sb.Append(format);
+            }
+
+            if (args != null)
+            {
+                foreach (object o in args)
+                {
+                    if (o != null)
+                    {
+                        sb.Append(":");
+                        sb.Append(o);
+                    }
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

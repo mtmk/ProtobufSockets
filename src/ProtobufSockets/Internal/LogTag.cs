@@ -6,5 +6,6 @@ namespace ProtobufSockets.Internal
         PublisherClient = 2,
 		Subscriber = 3,
 		SubscriberClient = 4,
+        ProtoSerialiser = 5,
     }
 }

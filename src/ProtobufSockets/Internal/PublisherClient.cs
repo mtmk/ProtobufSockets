@@ -107,6 +107,11 @@ namespace ProtobufSockets.Internal
                     Log.Debug(Tag, "Consumer: IOException: " + e.Message);
                     break;
                 }
+                catch (ProtoSerialiserException)
+                {
+                    Log.Debug(Tag, "Consumer: ProtoSerialiserException");
+                    break;
+                }
             }
 
             _store.Remove(_tcpClient.Client);

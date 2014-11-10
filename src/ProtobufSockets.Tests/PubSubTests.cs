@@ -14,6 +14,7 @@ namespace ProtobufSockets.Tests
 		public void Publisher_starts_with_an_ephemeral_port()
 		{
 			var r = new ManualResetEvent(false);
+			var r2 = new ManualResetEvent(false);
 
 			var publisher = new Publisher();
 
@@ -21,11 +22,13 @@ namespace ProtobufSockets.Tests
 
 			subscriber.Subscribe<Message>("*", m =>
 				{
-					r.Set();
 					Assert.AreEqual("payload1", m.Payload);
-				});
+                    r.Set();
+                }, _ => r2.Set());
 
-			publisher.Publish("*", new Message {Payload = "payload1"});
+            Assert.IsTrue(r2.WaitOne(Timeout), "Timed out");
+
+            publisher.Publish("*", new Message { Payload = "payload1" });
 
 			Assert.IsTrue(r.WaitOne(Timeout), "Timed out");
 

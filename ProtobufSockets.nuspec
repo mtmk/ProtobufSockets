@@ -2,14 +2,19 @@
 <package >
   <metadata>
     <id>ProtobufSockets</id>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <authors>Ziya Suzen</authors>
     <owners>Ziya Suzen</owners>
     <licenseUrl>https://raw.githubusercontent.com/mtmk/ProtobufSockets/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/mtmk/ProtobufSockets</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Simple .Net socket wrapper aimed at PubSub using protobuf-net</description>
-    <releaseNotes>Initial release</releaseNotes>
+    <releaseNotes>
+      (1.0.1)
+      * Initial release
+      (1.0.2)
+      * Serialisation exception handling
+    </releaseNotes>
     <copyright>Copyright 2014</copyright>
     <tags>protobuf pubsub publish subscribe network sockets</tags>
     <dependencies>

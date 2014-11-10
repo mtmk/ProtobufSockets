@@ -1,16 +1,11 @@
-  * Handle Serialisation errors:
-System.ArgumentException: Cannot write to stream
-Parameter name: dest
-   at ProtoBuf.ProtoWriter..ctor(Stream dest, TypeModel model, SerializationContext context) in c:\Dev\protobuf-net\protobuf-net\ProtoWriter.cs:line 446
-   at ProtoBuf.Meta.TypeModel.SerializeWithLengthPrefix(Stream dest, Object value, Type type, PrefixStyle style, Int32 fieldNumber, SerializationContext context) in c:\Dev\protobuf-net\protobuf-net\Meta\TypeModel.cs:line 531
-   at ProtoBuf.Meta.TypeModel.SerializeWithLengthPrefix(Stream dest, Object value, Type type, PrefixStyle style, Int32 fieldNumber) in c:\Dev\protobuf-net\protobuf-net\Meta\TypeModel.cs:line 509
-   at ProtoBuf.Serializer.SerializeWithLengthPrefix[T](Stream destination, T instance, PrefixStyle style, Int32 fieldNumber) in c:\Dev\protobuf-net\protobuf-net\Serializer.cs:line 352
-   at ProtoBuf.Serializer.SerializeWithLengthPrefix[T](Stream destination, T instance, PrefixStyle style) in c:\Dev\protobuf-net\protobuf-net\Serializer.cs:line 335
-   at ProtobufSockets.Publisher.ClientAccept(IAsyncResult ar)
-   at System.Net.LazyAsyncResult.Complete(IntPtr userToken)
-   at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean ignoreSyncCtx)
-   at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
-   at System.Net.ContextAwareResult.Complete(IntPtr userToken)
-   at System.Net.Sockets.BaseOverlappedAsyncResult.CompletionPortCallback(UInt32 errorCode, UInt32 numBytes, NativeOverlapped* nativeOverlapped)
-   at System.Threading._IOCompletionCallback.PerformIOCompletionCallback(UInt32 errorCode, UInt32 numBytes, NativeOverlapped* pOVERLAP)
-    - 
+  * [DONE - 1.0.2] Handle Serialisation errors:
+    System.ArgumentException: Cannot write to stream
+     at ProtoBuf.ProtoWriter..ctor()
+     at ProtoBuf.Meta.TypeModel.SerializeWithLengthPrefix()
+     at ProtoBuf.Serializer.SerializeWithLengthPrefix[T]()
+     at ProtobufSockets.Publisher.ClientAccept()
+     at System.Net.LazyAsyncResult.Complete()
+     at System.Threading.ExecutionContext.Run()
+     at System.Net.ContextAwareResult.Complete()
+     at System.Net.Sockets.BaseOverlappedAsyncResult.CompletionPortCallback()
+     at System.Threading._IOCompletionCallback.PerformIOCompletionCallback()

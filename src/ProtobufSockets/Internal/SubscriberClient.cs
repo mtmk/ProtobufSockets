@@ -96,8 +96,6 @@ namespace ProtobufSockets.Internal
 
         void Consume()
         {
-            var typeName = _type.FullName;
-
             Log.Info(Tag, "Consumer started [" + Thread.CurrentThread.ManagedThreadId + "]");
 
             while (Interlocked.CompareExchange(ref _disposed, 0, 0) == 0)
@@ -109,13 +107,6 @@ namespace ProtobufSockets.Internal
                     Log.Debug(Tag,
                         "Received header [name=" + (header.Name ?? "<null>") + " type=" + (header.Type ?? "<null>") +
                         " topic=" + (header.Topic ?? "<null>") + "]");
-
-//                    if (header.Type != typeName)
-//                    {
-//                        Log.Debug(Tag, "Ignoring unmatched type. (Subscribed with wrong type?)");
-//                        _serialiser.Chew(_networkStream);
-//                        continue;
-//                    }
 
                     var message = _serialiser.Deserialize(_networkStream, _type);
 
