@@ -12,6 +12,7 @@ namespace ProtobufSockets.TestGui
         private readonly IPEndPoint _endPoint;
         private Publisher _publisher;
         private int _started;
+        private int _sendData;
         private readonly object _sync = new object();
 
         public PublisherWindow(string text, int i)
@@ -60,13 +61,17 @@ namespace ProtobufSockets.TestGui
                 int i = 0;
                 while (Interlocked.CompareExchange(ref _started, 0, 0) == 1)
                 {
-                    _publisher.Publish(new Message { Payload = "message" + i++ });
-                    Thread.Sleep(100);
-                    int i1 = i;
-                    Dispatcher.Invoke((Action)(() =>
+                    if (Interlocked.CompareExchange(ref _sendData, 0, 0) == 1)
                     {
-                        PublisherLabel.Content = "count: " + i1;
-                    }));
+                        i++;
+                        _publisher.Publish(new Message { Payload = "message" + i });
+                        int i1 = i;
+                        Dispatcher.Invoke((Action) (() =>
+                        {
+                            PublisherLabel.Content = "count: " + i1;
+                        }));
+                    }
+                    Thread.Sleep(100);
                 }
 
                 lock (_sync)
@@ -80,6 +85,16 @@ namespace ProtobufSockets.TestGui
         private void Publisher_Stop_Button_Click(object sender, RoutedEventArgs e)
         {
             Interlocked.Exchange(ref _started, 0);
+        }
+
+        private void SendDataCheckBox_OnChecked(object sender, RoutedEventArgs e)
+        {
+            Interlocked.Exchange(ref _sendData, 1);
+        }
+
+        private void SendDataCheckBox_OnUnchecked(object sender, RoutedEventArgs e)
+        {
+            Interlocked.Exchange(ref _sendData, 0);
         }
     }
 }

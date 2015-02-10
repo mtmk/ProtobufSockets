@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using ProtobufSockets.Internal;
 using ProtobufSockets.Stats;
 
@@ -15,6 +16,7 @@ namespace ProtobufSockets
         readonly TcpListener _listener;
         readonly PublisherSubscriptionStore _store;
         readonly ProtoSerialiser _serialiser = new ProtoSerialiser();
+        private Timer _timer;
 
         public Publisher() : this(new IPEndPoint(IPAddress.Loopback, 0))
         {
@@ -26,6 +28,7 @@ namespace ProtobufSockets
             _listener.Start();
             _listener.BeginAcceptTcpClient(ClientAccept, null);
             _store = new PublisherSubscriptionStore();
+            _timer = new Timer(Publish, new Beat(), 10*1000, 5*1000);
         }
 
         public IPEndPoint EndPoint
@@ -79,6 +82,8 @@ namespace ProtobufSockets
         public void Dispose()
         {
             Log.Info(Tag, "Disposing.");
+
+            _timer.Dispose();
 
             foreach (var client in _store.Subscriptions)
             {

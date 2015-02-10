@@ -12,4 +12,11 @@ namespace ProtobufSockets.Internal
         [ProtoMember(3)]
         public string Name { get; set; }
     }
+
+    [ProtoContract]
+    public class Beat
+    {
+        [ProtoMember(1)]
+        public int Number { get; set; }
+    }
 }

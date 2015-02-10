@@ -32,6 +32,7 @@ namespace ProtobufSockets
 
 		bool _disposed;
 		int _indexEndPoint = -1;
+		long _beatCount = -1;
 		Timer _reconnectTimer;
 
 		SubscriberClient _client;
@@ -39,12 +40,29 @@ namespace ProtobufSockets
 		Type _type;
 		Action<object> _action;
 		Action<IPEndPoint> _connectedAction;
+        readonly Timer _beatTimer;
 
         public Subscriber(IPEndPoint[] endPoints, string name = null)
         {
             _endPoints = endPoints;
             _name = name;
             _statEndPoints = _endPoints.Select(e => e.ToString()).ToArray();
+
+            _beatTimer = new Timer(_ => CheckBeat(), null, 10*1000, 10*1000);
+        }
+
+        private void CheckBeat()
+        {
+            lock (_clientSync)
+            {
+                if (_client == null) return;
+                long beatCount = _client.GetBeatCount();
+                long exchange = Interlocked.CompareExchange(ref _beatCount, beatCount, beatCount);
+                
+                if (exchange != beatCount) return;
+                Log.Debug(Tag, "Lost the heart beat, will failover..");
+                FailOver();
+            }
         }
 
         public void Subscribe<T>(Action<T> action)
@@ -116,6 +134,7 @@ namespace ProtobufSockets
         public void Dispose()
         {
 			lock (_disposeSync) _disposed = true;
+            _beatTimer.Dispose();
             CloseClient();
         }
 

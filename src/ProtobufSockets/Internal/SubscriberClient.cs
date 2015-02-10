@@ -21,6 +21,7 @@ namespace ProtobufSockets.Internal
         readonly ProtoSerialiser _serialiser;
         readonly Action<object> _action;
         readonly Action<IPEndPoint> _disconnected;
+        private long _beat;
 
         internal static SubscriberClient Connect(IPEndPoint endPoint, string name, string topic, Type type, Action<object> action, Action<IPEndPoint> disconnected)
         {
@@ -85,6 +86,11 @@ namespace ProtobufSockets.Internal
             return Interlocked.CompareExchange(ref _messageCount, 0, 0);
         }
 
+        internal long GetBeatCount()
+        {
+            return Interlocked.CompareExchange(ref _beat, 0, 0);
+        }
+
         internal void Dispose()
         {
             if (Interlocked.CompareExchange(ref _disposed, 0, 0) == 1) return;
@@ -107,6 +113,13 @@ namespace ProtobufSockets.Internal
                     Log.Debug(Tag,
                         "Received header [name=" + (header.Name ?? "<null>") + " type=" + (header.Type ?? "<null>") +
                         " topic=" + (header.Topic ?? "<null>") + "]");
+
+                    if (header.Type == typeof (Beat).FullName)
+                    {
+                        var beat = _serialiser.Deserialize(_networkStream, typeof(Beat));
+                        Interlocked.Increment(ref _beat);
+                        continue;
+                    }
 
                     var message = _serialiser.Deserialize(_networkStream, _type);
 
