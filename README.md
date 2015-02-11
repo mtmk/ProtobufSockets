@@ -63,9 +63,9 @@ A few backend services that needs to process light to medium load (tens to a few
 hundred messages per second) data streams in a ressilient fashion. There maybe multiple
 redundant publishers of the same data streams and multiple subscribers connecting to
 one of these publishers. In case a publisher goes down subscribers connects to the next
-available one. Silent netwoek failures are handled by using hearbeat messages between publisher
+available one. Silent network failures are handled by using hearbeat messages between publisher
 and subscriber pairs. Subscribers can also subscribe to predefined topics. A publisher
-might be publishing messages of for multiple topics and wil only sends the ones subscriber
+might be publishing messages for multiple topics and it will only sends the ones a given subscriber
 is interested in.
 
 
