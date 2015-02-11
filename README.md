@@ -6,6 +6,8 @@ need any native DLLs.
 
 <a href="https://ci.appveyor.com/project/mtmk/protobufsockets"><img src="https://ci.appveyor.com/api/projects/status/github/mtmk/ProtobufSockets?branch=master&svg=true"/></a>
 
+    PM> Install-Package ProtobufSockets
+
 Example
 =======
 
