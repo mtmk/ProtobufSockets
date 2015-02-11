@@ -13,6 +13,8 @@ namespace ProtobufSockets.TestGui
     {
         private readonly IPEndPoint[] _endPoints;
         private Subscriber _subscriber;
+        private readonly object _topicSync = new object();
+        private string _topic = "*";
 
         private readonly object _sync = new object();
 
@@ -20,6 +22,7 @@ namespace ProtobufSockets.TestGui
         {
             InitializeComponent();
 
+            TopicTextBox.Text = Topic;
             Title += " - " + i;
 
             _endPoints = text.Split(' ')
@@ -54,6 +57,8 @@ namespace ProtobufSockets.TestGui
 
         private void Subscriber_Start_Button_Click(object sender, RoutedEventArgs e)
         {
+            TopicTextBox.IsEnabled = false;
+
             lock (_sync)
             {
                 if (_subscriber != null) return;
@@ -61,18 +66,20 @@ namespace ProtobufSockets.TestGui
             }
 
             int i = 0;
-            _subscriber.Subscribe<Message>(m =>
+            _subscriber.Subscribe<Message>(Topic, m =>
             {
                 int count = Interlocked.Increment(ref i);
                 Dispatcher.Invoke((Action)(() =>
                 {
-                    SubscriberLabel.Content = "count: " + count;
+                    SubscriberLabel.Content = "count: " + count + " (" + m.Payload + ")";
                 }));
             });
         }
 
         private void Subscriber_Stop_Button_Click(object sender, RoutedEventArgs e)
         {
+            TopicTextBox.IsEnabled = true;
+
             lock (_sync)
             {
                 if (_subscriber != null)
@@ -92,6 +99,17 @@ namespace ProtobufSockets.TestGui
                     _subscriber.FailOver();
                 }
             }
+        }
+
+        public string Topic
+        {
+            get { lock (_topicSync) return _topic; }
+            set { lock (_topicSync) _topic = value; }
+        }
+
+        private void TopicTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            Topic = TopicTextBox.Text;
         }
     }
 }

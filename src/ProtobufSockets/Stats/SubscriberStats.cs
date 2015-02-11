@@ -5,6 +5,7 @@
         public SubscriberStats(bool connected,
             int reconnectCount,
             long messageCount,
+            long beatCount,
             long totalMessageCount,
             string currentEndPoint,
             string[] endPoints,
@@ -15,6 +16,7 @@
         {
             Connected = connected;
             ReconnectCount = reconnectCount;
+            BeatCount = beatCount;
             MessageCount = messageCount;
             TotalMessageCount = totalMessageCount;
             CurrentEndPoint = currentEndPoint;
@@ -27,6 +29,7 @@
 
         public bool Connected { get; private set; }
         public int ReconnectCount { get; private set; }
+        public long BeatCount { get; private set; }
         public long MessageCount { get; private set; }
         public long TotalMessageCount { get; private set; }
         public string CurrentEndPoint { get; private set; }

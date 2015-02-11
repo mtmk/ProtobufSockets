@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Windows;
@@ -14,10 +15,15 @@ namespace ProtobufSockets.TestGui
         private int _started;
         private int _sendData;
         private readonly object _sync = new object();
+        private readonly object _topicSync = new object();
+        private string _topic = "";
 
         public PublisherWindow(string text, int i)
         {
             InitializeComponent();
+
+            SendDataCheckBox.IsChecked = true;
+            TopicTextBox.Text = Topic;
 
             Title += " - " + i;
 
@@ -64,7 +70,7 @@ namespace ProtobufSockets.TestGui
                     if (Interlocked.CompareExchange(ref _sendData, 0, 0) == 1)
                     {
                         i++;
-                        _publisher.Publish(new Message { Payload = "message" + i });
+                        _publisher.Publish(Topic, new Message { Payload = "message" + i });
                         int i1 = i;
                         Dispatcher.Invoke((Action) (() =>
                         {
@@ -82,6 +88,12 @@ namespace ProtobufSockets.TestGui
             });
         }
 
+        public string Topic
+        {
+            get { lock(_topicSync) return _topic; }
+            set { lock (_topicSync) _topic = value; }
+        }
+
         private void Publisher_Stop_Button_Click(object sender, RoutedEventArgs e)
         {
             Interlocked.Exchange(ref _started, 0);
@@ -95,6 +107,11 @@ namespace ProtobufSockets.TestGui
         private void SendDataCheckBox_OnUnchecked(object sender, RoutedEventArgs e)
         {
             Interlocked.Exchange(ref _sendData, 0);
+        }
+
+        private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            Topic = TopicTextBox.Text;
         }
     }
 }

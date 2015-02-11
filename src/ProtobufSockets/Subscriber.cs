@@ -57,9 +57,10 @@ namespace ProtobufSockets
             {
                 if (_client == null) return;
                 long beatCount = _client.GetBeatCount();
-                long exchange = Interlocked.CompareExchange(ref _beatCount, beatCount, beatCount);
-                
-                if (exchange != beatCount) return;
+                long current = Interlocked.Exchange(ref _beatCount, beatCount);
+
+                if (current != beatCount) return;
+
                 Log.Debug(Tag, "Lost the heart beat, will failover..");
                 FailOver();
             }
@@ -106,11 +107,15 @@ namespace ProtobufSockets
 			}
 
 			long count = 0;
+			long beatCount = 0;
 			long totalCount;
 			lock (_clientSync)
 			{
-				if (_client != null)
-					count = _client.GetMessageCount();
+			    if (_client != null)
+			    {
+			        count = _client.GetMessageCount();
+			        beatCount = _client.GetBeatCount();
+			    }
 
 			    if (count < _lastCount)
 			        _lastCount = 0;
@@ -128,7 +133,7 @@ namespace ProtobufSockets
 
 			return new SubscriberStats(Interlocked.CompareExchange(ref _connected, 0, 0) == 1,
 				Interlocked.CompareExchange(ref _reconnect, 0, 0),
-				count, totalCount, currentEndPoint, _statEndPoints, topic, type, _name, statsBuilder.Build());
+				count, beatCount, totalCount, currentEndPoint, _statEndPoints, topic, type, _name, statsBuilder.Build());
 		}
 
         public void Dispose()

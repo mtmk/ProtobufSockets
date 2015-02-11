@@ -1,0 +1,10 @@
+﻿* Failover leaves subscribers on publisher when there is no data
+  .run publisher with no data.
+  .run subscriber and fail over many times
+  -publisher should clean up subscribers every few seconds
+
+* Verify heartbeat is sent to subscriber
+  .run publisher with no data
+  .run subscriber and start
+  -subscriber stats beat should increase every few seconds
+
