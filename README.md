@@ -66,17 +66,5 @@ can connect to an equal publisher if one fails). Also no overall message consist
 is guaranteed either, so durign failover yoou might loose a few messages.
 Your application should be tolerant for this occasional message loss as well.
 
-Other libraries you might want to check
-=======================================
-If some of the limitations aren't acceptable for you, please see these other libraries.
-This is a quick list of other libraries I found on NuGet which might provide more
-general functionality:
-
-(Note that I haven't used them myself, only found them on NuGet and they looked 'OK',
-so please don't blame me if they don't work. Do your own research.)
-
-https://www.nuget.org/packages/RedFoxMQ.Serialization.ProtoBuf/
-
-https://www.nuget.org/packages/Stacks.ProtoBuf/
 
 
