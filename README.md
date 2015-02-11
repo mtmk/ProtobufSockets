@@ -60,10 +60,13 @@ static void Main()
 Main scenario
 =============
 A few backend services that needs to process light to medium load (tens to a few
-hundred messages per second) in a ressilient fashion (i.e. subscriber
-can connect to an equal publisher if one fails). Also note that no overall message consistency
-is guaranteed. During failover you might lose a few messages.
-Your application should be tolerant for this occasional message loss.
+hundred messages per second) data streams in a ressilient fashion. There maybe multiple
+redundant publishers of the same data streams and multiple subscribers connecting to
+one of these publishers. In case a publisher goes down subscribers connects to the next
+available one. Silent netwoek failures are handled by using hearbeat messages between publisher
+and subscriber pairs. Subscribers can also subscribe to predefined topics. A publisher
+might be publishing messages of for multiple topics and wil only sends the ones subscriber
+is interested in.
 
 
 
