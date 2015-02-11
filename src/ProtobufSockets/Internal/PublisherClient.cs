@@ -23,6 +23,9 @@ namespace ProtobufSockets.Internal
         readonly string _type;
 		int _messageLoss;
         long _count;
+        long _beatCount;
+        long _beatCountCheck;
+        readonly Timer _beatTimer;
 
 		internal PublisherClient(TcpClient tcpClient, NetworkStream networkStream, Header header, PublisherSubscriptionStore store)
         {
@@ -36,6 +39,17 @@ namespace ProtobufSockets.Internal
 
             _consumerThread = new Thread(Consumer) { IsBackground = true };
             _consumerThread.Start();
+
+		    _beatTimer = new Timer(_ =>
+		    {
+		        long count = Interlocked.CompareExchange(ref _beatCount, 0, 0);
+		        long current = Interlocked.Exchange(ref _beatCountCheck, count);
+		        if (count == current)
+		        {
+                    Log.Info(Tag, "Failed heartbeat count from subscriber " + (Name ?? "<null>") + " - closing network stream");
+                    _networkStream.Close();
+		        }
+		    }, null, 10*1000, 10*1000);
         }
 
 		internal string Topic { get { return _topic; } }
@@ -45,6 +59,7 @@ namespace ProtobufSockets.Internal
         internal string Type { get { return _type; } }
         internal int Backlog { get { return _q.Count; } }
         internal long MessageCount { get { return Interlocked.CompareExchange(ref _count, 0, 0); } }
+        internal long BeatCount { get { return Interlocked.CompareExchange(ref _beatCount, 0, 0); } }
 
         internal void Send(string topic, Type type, object message)
         {
@@ -71,9 +86,16 @@ namespace ProtobufSockets.Internal
         internal void Close()
         {
             Log.Debug(Tag, "Closing.");
-            _cancellation.Cancel();
-            _tcpClient.Close();
+            InternalClose();
             _consumerThread.Join();
+        }
+
+        void InternalClose()
+        {
+            _cancellation.Cancel();
+            _store.Remove(_tcpClient.Client);
+            _beatTimer.Dispose();
+            _tcpClient.Close();
         }
 
         void Consumer()
@@ -90,6 +112,25 @@ namespace ProtobufSockets.Internal
 
                     var header = new Header {Type = take.Type.FullName, Topic = take.Topic};
                     _serialiser.Serialise(_networkStream, header);
+
+                    // Beat-shake
+                    if (take.Type == typeof (Beat))
+                    {
+                        Interlocked.Increment(ref _beatCount);
+                        Log.Debug(Tag, "Heartbeat from subscriber " + (Name ?? "<null>"));
+
+                        var beatOut = (Beat)take.Object;
+                        _serialiser.Serialise(_networkStream, beatOut);
+                        var beatIn = _serialiser.Deserialize<Beat>(_networkStream);
+                        Log.Debug(Tag, "Heartbeat # " + (Name ?? "<null>") + " - " + beatIn.Number + " - " + beatOut.Number);
+                        if (beatIn.Number != beatOut.Number)
+                        {
+                            Log.Info(Tag, "Failed heartbeat from subscriber " + (Name ?? "<null>") + " - " + beatIn.Number + " - " + beatOut.Number);
+                            break;
+                        }
+                        continue;
+                    }
+
                     _serialiser.Serialise(_networkStream, take.Type, take.Object);
                 }
                 catch (InvalidOperationException)
@@ -114,8 +155,7 @@ namespace ProtobufSockets.Internal
                 }
             }
 
-            _store.Remove(_tcpClient.Client);
-            _tcpClient.Close();
+            InternalClose();
 
             Log.Info(Tag, "Exiting client consumer [" + Thread.CurrentThread.ManagedThreadId + "]");
         }

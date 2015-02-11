@@ -34,7 +34,7 @@ namespace ProtobufSockets
             // disconnected subscribers. This becomes helpfull if
             // there is no payload being sent. Otherwise subscribers
             // failing over will stack up and fill the memory.
-            _beatTimer = new Timer(b => Publish((Beat) b), new Beat(), 10*1000, 5*1000);
+            _beatTimer = new Timer(_ => Publish(new Beat{Number = new Random().Next(0, 1000000000)}), null, 10 * 1000, 5 * 1000);
         }
 
         public IPEndPoint EndPoint
@@ -75,7 +75,8 @@ namespace ProtobufSockets
                     client.EndPoint,
                     client.Topic,
                     client.Type,
-                    client.MessageCount))
+                    client.MessageCount,
+                    client.BeatCount))
                 .ToList();
 
             var statsBuilder = new SystemStatsBuilder();

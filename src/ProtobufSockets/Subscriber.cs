@@ -33,6 +33,7 @@ namespace ProtobufSockets
 		bool _disposed;
 		int _indexEndPoint = -1;
 		long _beatCount = -1;
+		int _beatFailover;
 		Timer _reconnectTimer;
 
 		SubscriberClient _client;
@@ -62,6 +63,7 @@ namespace ProtobufSockets
                 if (current != beatCount) return;
 
                 Log.Debug(Tag, "Lost the heart beat, will failover..");
+                Interlocked.Increment(ref _beatFailover);
                 FailOver();
             }
         }
@@ -133,6 +135,7 @@ namespace ProtobufSockets
 
 			return new SubscriberStats(Interlocked.CompareExchange(ref _connected, 0, 0) == 1,
 				Interlocked.CompareExchange(ref _reconnect, 0, 0),
+				Interlocked.CompareExchange(ref _beatFailover, 0, 0),
 				count, beatCount, totalCount, currentEndPoint, _statEndPoints, topic, type, _name, statsBuilder.Build());
 		}
 

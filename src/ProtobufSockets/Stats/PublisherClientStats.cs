@@ -8,7 +8,8 @@
             string endPoint,
             string topic,
             string type,
-            long messageCount)
+            long messageCount,
+            long beatCount)
         {
 			Name = name;
 			MessageLoss = messageLoss;
@@ -17,6 +18,7 @@
             Topic = topic;
             Type = type;
             MessageCount = messageCount;
+            BeatCount = beatCount;
         }
 
         public string Name { get; private set; }
@@ -26,5 +28,6 @@
         public string Topic { get; private set; }
         public string Type { get; private set; }
         public long MessageCount { get; private set; }
+        public long BeatCount { get; private set; }
     }
 }

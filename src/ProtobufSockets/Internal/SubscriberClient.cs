@@ -33,6 +33,7 @@ namespace ProtobufSockets.Internal
                 tcpClient.Connect(endPoint);
                 var networkStream = tcpClient.GetStream();
 
+                // handshake
                 serialiser.Serialise(networkStream, new Header {Topic = topic, Type = type.FullName, Name = name});
                 var ack = serialiser.Deserialize<string>(networkStream);
 
@@ -114,9 +115,13 @@ namespace ProtobufSockets.Internal
                         "Received header [name=" + (header.Name ?? "<null>") + " type=" + (header.Type ?? "<null>") +
                         " topic=" + (header.Topic ?? "<null>") + "]");
 
+                    // Beat-shake
                     if (header.Type == typeof (Beat).FullName)
                     {
-                        var beat = _serialiser.Deserialize(_networkStream, typeof(Beat));
+                        var beat = _serialiser.Deserialize<Beat>(_networkStream);
+                        _serialiser.Serialise(_networkStream, beat);
+                        Log.Debug(Tag, "Heartbeat from publisher");
+
                         Interlocked.Increment(ref _beat);
                         continue;
                     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using NUnit.Framework;
@@ -8,7 +9,7 @@ namespace ProtobufSockets.Tests
 	[TestFixture]
     public class PubSubTests
     {
-		const int Timeout = 3000;
+	    const int Timeout = 3000;
 
 		[Test]
 		public void Publisher_starts_with_an_ephemeral_port()
