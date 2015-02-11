@@ -1,7 +1,8 @@
 ProtobufSockets
 ===============
 
-Simple .Net socket wrapper aimed at PubSub using protobuf-net. It supports simple round-robin failover and transparent connection recovery if the publisher goes down temporarily.
+Simple .Net socket wrapper aimed at PubSub using protobuf-net. It supports simple round-robin failover and transparent connection recovery if the publisher goes down temporarily. It is fully managed and does not
+need any native DLLs.
 
 <a href="https://ci.appveyor.com/project/mtmk/protobufsockets"><img src="https://ci.appveyor.com/api/projects/status/github/mtmk/ProtobufSockets?branch=master&svg=true"/></a>
 
@@ -54,12 +55,6 @@ static void Main()
 
 }
 ```
-
-Disclamer
-=========
-This library uses syncronous sockets (i.e. Not IOCP) and keeps hold of a thread
-per client connection. It is not recommended if you have many clients
-(e.g. more than 50) especially connecting and disconnecting frequently.
 
 Main scenario
 =============

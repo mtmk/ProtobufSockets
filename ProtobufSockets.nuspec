@@ -2,20 +2,26 @@
 <package >
   <metadata>
     <id>ProtobufSockets</id>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <authors>Ziya Suzen</authors>
     <owners>Ziya Suzen</owners>
+    <title>Protocol Buffers Sockets</title>
+    <iconUrl>https://raw.githubusercontent.com/mtmk/ProtobufSockets/master/icon.png</iconUrl>
     <licenseUrl>https://raw.githubusercontent.com/mtmk/ProtobufSockets/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/mtmk/ProtobufSockets</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Simple .Net socket wrapper aimed at PubSub using protobuf-net</description>
+    <summary>ProtobuSockets is a socket wrapper with a simple API for PubSub. It uses protobuf-net library for
+      heavy-lifting of serialisation and framing. It supports simple round-robin failover and transparent connection recovery if the publisher goes down temporarily. It is fully managed and does not need any native DLLs.</summary>
     <releaseNotes>
-      (1.0.1)
-      * Initial release
-      (1.0.2)
-      * Serialisation exception handling
+(1.0.3)
+  * Bug fixes for silent network failures
+(1.0.2)
+  * Serialisation exception handling
+(1.0.1)
+  * Initial release
     </releaseNotes>
-    <copyright>Copyright 2014</copyright>
+    <copyright>Copyright 2014, 2015</copyright>
     <tags>protobuf pubsub publish subscribe network sockets</tags>
     <dependencies>
       <dependency id="protobuf-net" version="2.0.0.668" />
