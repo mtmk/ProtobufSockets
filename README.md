@@ -54,7 +54,6 @@ static void Main()
 
         Console.ReadLine();
     }
-
 }
 ```
 
@@ -62,9 +61,9 @@ Main scenario
 =============
 A few backend services that needs to process light to medium load (tens to a few
 hundred messages per second) in a ressilient fashion (i.e. subscriber
-can connect to an equal publisher if one fails). Also no overall message consistency
-is guaranteed either, so durign failover yoou might loose a few messages.
-Your application should be tolerant for this occasional message loss as well.
+can connect to an equal publisher if one fails). Also note that no overall message consistency
+is guaranteed. During failover you might lose a few messages.
+Your application should be tolerant for this occasional message loss.
 
 
 
