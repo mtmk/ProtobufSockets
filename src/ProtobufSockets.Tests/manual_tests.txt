@@ -1,7 +1,7 @@
 ﻿* Run unit tests
 
-[Using TestGui]
 * Happy path
+  [Using TestGui]
   .run 3 publishers
   .run 4 subscribers
   -failover randomly on subscribers
@@ -9,20 +9,20 @@
   -stop/start publishers
     -see subscribers go to others
 
-[Using TestGui]
 * Failover leaves subscribers on publisher when there is no data
+  [Using TestGui]
   .run publisher with no data.
   .run subscriber and fail over many times
   -publisher should clean up subscribers every few seconds
 
-[Using TestGui]
 * Verify heartbeat is sent to subscriber
+  [Using TestGui]
   .run publisher with no data
   .run subscriber and start
   -subscriber stats beat should increase every few seconds
 
-[Using TestGui]
 * Simulate network drop
+  [Using TestGui]
   .run socat.exe TCP4-LISTEN:23457 TCP4:127.0.0.1:23456
   .run publisher on 23456 with no data
   .run subscriber on 23457
@@ -33,3 +33,9 @@
   -see subscriber retry
   -see publisher clear subscriber
 
+* Handle protocol exceptions
+  [Using TestGui]
+  .run publisher and start
+  .telnet (telnet 127.0.0.1 23456) into it and type 'qwerqwerqwer..'
+  -Publisher should handle ProtoException and carry on
+  -telnet client should just exit(because connection is dropped)

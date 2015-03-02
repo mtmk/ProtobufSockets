@@ -59,9 +59,14 @@ namespace ProtobufSockets.Internal
             {
                 action();
             }
+            catch (ProtoException e)
+            {
+                Log.Error(Tag, "(ProtoSerialiser:ProtoException): " + e.Message);
+                throw new ProtoSerialiserException(e);
+            }
             catch (ArgumentException e)
             {
-                Log.Error(Tag, e.Message);
+                Log.Error(Tag, "(ProtoSerialiser:ArgumentException): " + e.Message);
                 throw new ProtoSerialiserException(e);
             }
         }
