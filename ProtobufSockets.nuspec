@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ProtobufSockets</id>
-    <version>1.0.3</version>
+    <version>2.0.0</version>
     <authors>Ziya Suzen</authors>
     <owners>Ziya Suzen</owners>
     <title>Protocol Buffers Sockets</title>
@@ -14,12 +14,14 @@
     <summary>ProtobuSockets is a socket wrapper with a simple API for PubSub. It uses protobuf-net library for
       heavy-lifting of serialisation and framing. It supports simple round-robin failover and transparent connection recovery if the publisher goes down temporarily. It is fully managed and does not need any native DLLs.</summary>
     <releaseNotes>
-(1.0.3)
-  * Bug fixes for silent network failures
-(1.0.2)
-  * Serialisation exception handling
-(1.0.1)
-  * Initial release
+      (2.0.0)
+      * Bug fixes for ProtoExceptions
+      (1.0.3)
+      * Bug fixes for silent network failures
+      (1.0.2)
+      * Serialisation exception handling
+      (1.0.1)
+      * Initial release
     </releaseNotes>
     <copyright>Copyright 2014, 2015</copyright>
     <tags>protobuf pubsub publish subscribe network sockets</tags>

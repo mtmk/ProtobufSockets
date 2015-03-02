@@ -1,3 +1,5 @@
+  * [DONE - 2.0.0] Handle ProtoException's
+
   * [DONE - 1.0.3] Handle silent network errors
   
   * [DONE - 1.0.2] Handle Serialisation errors:
